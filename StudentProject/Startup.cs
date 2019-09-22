@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StudentProject.DBContext;
+using StudentProject.DataAccess;
+using StudentProject.Services;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace StudentProject
@@ -29,10 +31,14 @@ namespace StudentProject
                 }
             );
 
+            services.AddSingleton(ConfigureMapper());
+
             services.AddDbContext<StudentProjectDbContext>(
                 options =>
                     options.UseSqlite(Configuration.GetConnectionString("StudentProjectDataBase"))
             );
+
+            services.AddServices();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -77,5 +83,18 @@ namespace StudentProject
                 }
             );
         }
+
+        private static IMapper ConfigureMapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfile<MappingProfile>();
+                });
+
+            config.AssertConfigurationIsValid();
+
+            return config.CreateMapper();
+        }
+
     }
 }
